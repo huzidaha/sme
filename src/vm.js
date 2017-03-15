@@ -10,7 +10,13 @@ import {
   LESS_THAN,
   GREATER_AND_EQUAL_THAN,
   LESS_AND_EQUAL_THAN,
-  JUMP, IF_FALSE_JUMP
+  IF_FALSE_JUMP,
+  JUMP,
+  LOAD,
+  CALL,
+  RETURN,
+  AND,
+  OR
 } from './instructions'
 
 export default class VM {
@@ -20,6 +26,7 @@ export default class VM {
     this.ip = 0 // instructions address pointer
     this.sp = -1 // stack pointer
     this.fp = null // frame pointer
+    this.trace = false
   }
 
   performBinaryOp (op) {
@@ -29,9 +36,15 @@ export default class VM {
     this.stack[this.sp] = op(a, b)
   }
 
-  run () {
+  logStack () {
+    console.log(this.stack.slice(0, this.sp + 1))
+  }
+
+  run (fromIp = 0) {
+    this.ip = fromIp
     while (this.ip < this.codes.length) {
       let { codes, stack } = this
+      let a, b
       const code = codes[this.ip++]
       switch (code) {
         case CONST:
@@ -62,22 +75,59 @@ export default class VM {
           this.performBinaryOp((a, b) => a >= b)
           break
         case LESS_AND_EQUAL_THAN:
-          this.performBinaryOp((a, b) => a <= b)
+        case AND:
+          this.performBinaryOp((a, b) => a && b)
+          break
+        case OR:
+          this.performBinaryOp((a, b) => a || b)
           break
         case PRINT:
-          console.log(this.stack[this.sp--])
+          console.log(stack[this.sp--])
           break
         case JUMP:
-          this.ip = this.codes[this.ip++]
+          this.ip = codes[this.ip]
           break
         case IF_FALSE_JUMP:
-          if (!this.stack[this.sp--]) {
-            this.ip = this.codes[this.ip++]
+          if (!stack[this.sp--]) {
+            this.ip = codes[this.ip]
+          } else {
+            this.ip++
           }
+          break
+        case LOAD:
+          a = codes[this.ip++]
+          stack[++this.sp] = stack[this.fp + a]
+          break
+        case CALL:
+          // -> fp
+          //    ip
+          //    numArgs
+          //    ...
+          //    arg3
+          //    arg2
+          //    arg1
+          a = codes[this.ip++]
+          b = codes[this.ip++]
+          stack[++this.sp] = b // number of arguments
+          stack[++this.sp] = this.ip // run after return
+          stack[++this.sp] = this.fp
+          this.fp = this.sp
+          this.ip = a // start to call
+          break
+        case RETURN:
+          a = stack[this.sp]
+          this.sp = this.fp // restore sp pointer
+          this.fp = stack[this.sp] // restore fp pointer
+          this.sp-- // -> ip
+          this.ip = stack[this.sp] // restore ip
+          this.sp-- // -> number of arguments
+          this.sp = this.sp - stack[this.sp] // jump to last
+          stack[this.sp] = a // set it to returned value
           break
         default:
           break
       }
+      if (this.trace) this.logStack()
     }
   }
 }

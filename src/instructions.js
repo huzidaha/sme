@@ -1,19 +1,16 @@
-class Instuction {
-  constructor (operantsNum) {
-    this.operantsNum = operantsNum
-  }
-}
-
-export const ADD = new Instuction(0)
-export const SUBSTRACT = new Instuction(0)
-export const MULTIPLE = new Instuction(0)
-export const DIVIDE = new Instuction(0)
-export const CONST = new Instuction(1)
-export const PRINT = new Instuction(0)
-export const EQUAL_TO = new Instuction(0)
-export const GREATER_THAN = new Instuction(0)
-export const LESS_THAN = new Instuction(0)
-export const GREATER_AND_EQUAL_THAN = new Instuction(0)
-export const LESS_AND_EQUAL_THAN = new Instuction(0)
-export const IF_FALSE_JUMP = new Instuction(1)
-export const JUMP = new Instuction(1)
+export const ADD = 0
+export const SUBSTRACT = 1
+export const MULTIPLE = 2
+export const DIVIDE = 3
+export const CONST = 4
+export const PRINT = 5
+export const EQUAL_TO = 6
+export const GREATER_THAN = 7
+export const LESS_THAN = 8
+export const AND = 9
+export const OR = 10
+export const IF_FALSE_JUMP = 11
+export const JUMP = 12
+export const LOAD = 13
+export const CALL = 14
+export const RETURN = 15

@@ -4,7 +4,7 @@ import {
   CONST, ADD, SUBSTRACT, DIVIDE, MULTIPLE,
   PRINT,
   LESS_THAN, GREATER_THAN, EQUAL_TO,
-  JUMP, IF_FALSE_JUMP
+  JUMP, IF_FALSE_JUMP, LOAD, RETURN, CALL
 } from '../src/instructions'
 
 const spv = (vm, n = 0) => vm.stack[vm.sp - n]
@@ -135,4 +135,38 @@ test('IF_FALSE_JUMP: FALSE', (t) => {
   ])
   vm.run()
   t.is(spv(vm), 11)
+})
+
+test('CALL: call a function', (t) => {
+  // a = (x, y, z) => x + y - z
+  // 2 * a(4, 1, 3) + a(2, 2, 3) :=> 5
+  // -> fp
+  //    ip
+  //    numArgs
+  //    ..
+  //    arg2
+  //    arg1
+  let vm = new VM([
+    // function a with address 0
+    LOAD, -3, // 0
+    LOAD, -4, // 2
+    LOAD, -5, // 4
+    ADD, // 6
+    SUBSTRACT, // 7
+    RETURN, // 8
+
+    CONST, 2, // 9
+    CONST, 4, // 11
+    CONST, 1, // 13
+    CONST, 3, // 15
+    CALL, 0, 3, // call function a with arguments num 3
+    MULTIPLE,
+    CONST, 2,
+    CONST, 2,
+    CONST, 3,
+    CALL, 0, 3,
+    ADD
+  ])
+  vm.run(9)
+  t.is(spv(vm), 5)
 })
