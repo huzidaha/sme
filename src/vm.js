@@ -75,6 +75,8 @@ export default class VM {
           this.binaryOperation((a, b) => a >= b)
           break
         case LESS_AND_EQUAL_THAN:
+          this.binaryOperation((a, b) => a <= b)
+          break
         case AND:
           this.binaryOperation((a, b) => a && b)
           break
