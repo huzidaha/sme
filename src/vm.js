@@ -29,7 +29,7 @@ export default class VM {
     this.trace = false
   }
 
-  performBinaryOp (op) {
+  binaryOperation (op) {
     let a = this.stack[this.sp--]
     let b = this.stack[this.sp--]
     this.sp++
@@ -51,35 +51,35 @@ export default class VM {
           stack[++this.sp] = codes[this.ip++]
           break
         case ADD:
-          this.performBinaryOp((a, b) => a + b)
+          this.binaryOperation((a, b) => a + b)
           break
         case SUBSTRACT:
-          this.performBinaryOp((a, b) => a - b)
+          this.binaryOperation((a, b) => a - b)
           break
         case MULTIPLE:
-          this.performBinaryOp((a, b) => a * b)
+          this.binaryOperation((a, b) => a * b)
           break
         case DIVIDE:
-          this.performBinaryOp((a, b) => a / b)
+          this.binaryOperation((a, b) => a / b)
           break
         case EQUAL_TO:
-          this.performBinaryOp((a, b) => a === b)
+          this.binaryOperation((a, b) => a === b)
           break
         case GREATER_THAN:
-          this.performBinaryOp((a, b) => a > b)
+          this.binaryOperation((a, b) => a > b)
           break
         case LESS_THAN:
-          this.performBinaryOp((a, b) => a < b)
+          this.binaryOperation((a, b) => a < b)
           break
         case GREATER_AND_EQUAL_THAN:
-          this.performBinaryOp((a, b) => a >= b)
+          this.binaryOperation((a, b) => a >= b)
           break
         case LESS_AND_EQUAL_THAN:
         case AND:
-          this.performBinaryOp((a, b) => a && b)
+          this.binaryOperation((a, b) => a && b)
           break
         case OR:
-          this.performBinaryOp((a, b) => a || b)
+          this.binaryOperation((a, b) => a || b)
           break
         case PRINT:
           console.log(stack[this.sp--])
