@@ -24,6 +24,12 @@ import {
   TK_NAME
 } from './tokenizer'
 
+export const AST_FUNCTION = 'function definition'
+export const AST_CONDITION = 'condition'
+export const AST_FUNCTION_CALL = 'function call'
+export const AST_VARIABLE = 'variable'
+export const AST_CONSTANT = 'constant'
+
 export default (tokens) => {
   let index = 0
   const peekToken = () => tokens[index + 1]
@@ -50,7 +56,7 @@ export default (tokens) => {
 
   function parseFunction () {
     console.log('Parsing: FUNCTION')
-    const node = { type: 'function' }
+    const node = { type: AST_FUNCTION }
     eatToken(TK_PARENT_LEFT)
     eatToken(TK_DEFINE)
     node.nameAndArguments = parseNameArgumentsList()
@@ -101,7 +107,7 @@ export default (tokens) => {
   function parseCondition () {
     console.log('Parsing: condition')
     eatToken(TK_IF)
-    const node = { type: 'condition' }
+    const node = { type: AST_CONDITION }
     node.condition = parseValueOrConstant()
     node.trueValue = parseValueOrConstant()
     const token = currentToken()
@@ -128,7 +134,7 @@ export default (tokens) => {
     let token = eatToken(TK_NAME)
     console.log('Parsing: function call', token)
     const node = {
-      type: 'function-call',
+      type: AST_FUNCTION_CALL,
       name: token.value
     }
     const args = []
@@ -139,7 +145,7 @@ export default (tokens) => {
       isConstant(token)
     ) {
       if (isToken(token, TK_NAME)) {
-        args.push({ type: 'var', name: token.value })
+        args.push({ type: AST_VARIABLE, name: token.value })
         token = nextToken()
       } else if (isToken(token, TK_PARENT_LEFT)) {
         args.push(parseValue())
@@ -156,7 +162,7 @@ export default (tokens) => {
   function parseConstant () {
     const token = currentToken()
     nextToken()
-    return { type: 'constant', value: token.value }
+    return { type: AST_CONSTANT, value: token.value }
   }
 
   function isConstant (token) {

@@ -1,11 +1,20 @@
 import test from 'ava'
-import VM from '../src/vm'
-import {
-  CONST, ADD, SUBSTRACT, DIVIDE, MULTIPLE,
+import VM, {
+  ADD,
+  SUBSTRACT,
+  MULTIPLE,
+  DIVIDE,
+  CONST,
   PRINT,
-  LESS_THAN, GREATER_THAN, EQUAL_TO,
-  JUMP, IF_FALSE_JUMP, LOAD, RETURN, CALL
-} from '../src/instructions'
+  EQUAL_TO,
+  GREATER_THAN,
+  LESS_THAN,
+  IF_FALSE_JUMP,
+  JUMP,
+  LOAD,
+  CALL,
+  RETURN
+} from '../src/vm'
 
 const spv = (vm, n = 0) => vm.stack[vm.sp - n]
 
@@ -34,7 +43,7 @@ test('Math instructions', (t) => {
     SUBSTRACT
   ])
   vm.run()
-  t.is(vm.stack[0], -0.5)
+  t.is(vm.stack[0], -4)
   t.is(vm.sp, 0)
 })
 
@@ -70,14 +79,14 @@ test('LESS_THAN', (t) => {
     LESS_THAN
   ])
   vm.run()
-  t.is(vm.stack[vm.sp], false)
+  t.is(vm.stack[vm.sp], true)
   vm = new VM([
     CONST, 21,
     CONST, 20,
     LESS_THAN
   ])
   vm.run()
-  t.is(vm.stack[vm.sp], true)
+  t.is(vm.stack[vm.sp], false)
 })
 
 test('GREATER_THAN', (t) => {
@@ -87,14 +96,14 @@ test('GREATER_THAN', (t) => {
     GREATER_THAN
   ])
   vm.run()
-  t.is(vm.stack[vm.sp], true)
+  t.is(vm.stack[vm.sp], false)
   vm = new VM([
     CONST, 21,
     CONST, 20,
     GREATER_THAN
   ])
   vm.run()
-  t.is(vm.stack[vm.sp], false)
+  t.is(vm.stack[vm.sp], true)
 })
 
 test('IF_FALSE_JUMP: TRUE', (t) => {
@@ -114,7 +123,7 @@ test('IF_FALSE_JUMP: TRUE', (t) => {
     ADD // 20
   ])
   vm.run()
-  t.is(spv(vm), 9)
+  t.is(spv(vm), -9)
 })
 
 test('IF_FALSE_JUMP: FALSE', (t) => {
@@ -134,7 +143,7 @@ test('IF_FALSE_JUMP: FALSE', (t) => {
     ADD // 20
   ])
   vm.run()
-  t.is(spv(vm), 11)
+  t.is(spv(vm), 9)
 })
 
 test('CALL: call a function', (t) => {
@@ -168,5 +177,5 @@ test('CALL: call a function', (t) => {
     ADD
   ])
   vm.run(9)
-  t.is(spv(vm), 5)
+  t.is(spv(vm), -5)
 })

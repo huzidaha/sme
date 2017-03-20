@@ -10,6 +10,6 @@ const code = `
 (display 'fuckyou' 'everyday')
 `
 
-test('parse to ast', (t) => {
+test.skip('parse to ast', (t) => {
   // console.log(tokenizer(code))
 })

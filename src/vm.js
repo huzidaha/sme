@@ -1,23 +1,21 @@
-import {
-  ADD,
-  SUBSTRACT,
-  MULTIPLE,
-  DIVIDE,
-  CONST,
-  PRINT,
-  EQUAL_TO,
-  GREATER_THAN,
-  LESS_THAN,
-  GREATER_AND_EQUAL_THAN,
-  LESS_AND_EQUAL_THAN,
-  IF_FALSE_JUMP,
-  JUMP,
-  LOAD,
-  CALL,
-  RETURN,
-  AND,
-  OR
-} from './instructions'
+export const ADD = 0
+export const SUBSTRACT = 1
+export const MULTIPLE = 2
+export const DIVIDE = 3
+export const CONST = 4
+export const PRINT = 5
+export const EQUAL_TO = 6
+export const GREATER_THAN = 7
+export const GREATER_AND_EQUAL_THAN = 8
+export const LESS_THAN = 9
+export const LESS_AND_EQUAL_THAN = 10
+export const AND = 11
+export const OR = 12
+export const IF_FALSE_JUMP = 13
+export const JUMP = 14
+export const LOAD = 15
+export const CALL = 16
+export const RETURN = 17
 
 export default class VM {
   constructor (codes = []) {
@@ -51,37 +49,37 @@ export default class VM {
           stack[++this.sp] = codes[this.ip++]
           break
         case ADD:
-          this.binaryOperation((a, b) => a + b)
+          this.binaryOperation((a, b) => b + a)
           break
         case SUBSTRACT:
-          this.binaryOperation((a, b) => a - b)
+          this.binaryOperation((a, b) => b - a)
           break
         case MULTIPLE:
-          this.binaryOperation((a, b) => a * b)
+          this.binaryOperation((a, b) => b * a)
           break
         case DIVIDE:
-          this.binaryOperation((a, b) => a / b)
+          this.binaryOperation((a, b) => b / a)
           break
         case EQUAL_TO:
-          this.binaryOperation((a, b) => a === b)
+          this.binaryOperation((a, b) => b === a)
           break
         case GREATER_THAN:
-          this.binaryOperation((a, b) => a > b)
+          this.binaryOperation((a, b) => b > a)
           break
         case LESS_THAN:
-          this.binaryOperation((a, b) => a < b)
+          this.binaryOperation((a, b) => b < a)
           break
         case GREATER_AND_EQUAL_THAN:
-          this.binaryOperation((a, b) => a >= b)
+          this.binaryOperation((a, b) => b >= a)
           break
         case LESS_AND_EQUAL_THAN:
-          this.binaryOperation((a, b) => a <= b)
+          this.binaryOperation((a, b) => b <= a)
           break
         case AND:
-          this.binaryOperation((a, b) => a && b)
+          this.binaryOperation((a, b) => b && a)
           break
         case OR:
-          this.binaryOperation((a, b) => a || b)
+          this.binaryOperation((a, b) => b || a)
           break
         case PRINT:
           console.log(stack[this.sp--])
