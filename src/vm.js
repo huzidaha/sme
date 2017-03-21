@@ -131,3 +131,39 @@ export default class VM {
     }
   }
 }
+
+const inst = (name, numOfOperants) => ({ name, numOfOperants })
+const codeMaps = {
+  [ADD]: inst('ADD', 0),
+  [SUBSTRACT]: inst('SUBSTRACT', 0),
+  [MULTIPLE]: inst('MULTIPLE', 0),
+  [DIVIDE]: inst('DIVIDE', 0),
+  [CONST]: inst('CONST', 1),
+  [PRINT]: inst('PRINT', 0),
+  [EQUAL_TO]: inst('EQUAL_TO', 0),
+  [GREATER_THAN]: inst('GREATER_THAN', 0),
+  [GREATER_AND_EQUAL_THAN]: inst('GREATER_AND_EQUAL_THAN', 0),
+  [LESS_THAN]: inst('LESS_THAN', 0),
+  [LESS_AND_EQUAL_THAN]: inst('LESS_AND_EQUAL_THAN', 0),
+  [AND]: inst('AND', 0),
+  [OR]: inst('OR', 0),
+  [IF_FALSE_JUMP]: inst('IF_FALSE_JUMP', 1),
+  [JUMP]: inst('JUMP', 1),
+  [LOAD]: inst('LOAD', 1),
+  [CALL]: inst('CALL', 2),
+  [RETURN]: inst('RETURN', 0)
+}
+
+export const makeReadableBytecodes = (codes) => {
+  const bytecodes = []
+  for (let i = 0, len = codes.length; i < len; i++) {
+    const code = codes[i]
+    const instruction = codeMaps[code]
+    bytecodes.push(instruction.name)
+    for (let j = 0, len2 = instruction.numOfOperants; j < len2; j++) {
+      const operant = codes[++i]
+      bytecodes.push(operant)
+    }
+  }
+  return bytecodes
+}

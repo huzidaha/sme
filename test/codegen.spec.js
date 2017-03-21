@@ -2,7 +2,7 @@ import test from 'ava'
 import tokenizer from '../src/tokenizer'
 import parser from '../src/parser'
 import codegen from '../src/codegen'
-import VM from '../src/vm'
+import VM, { makeReadableBytecodes } from '../src/vm'
 
 // const code = `
 // (define (fib n)
@@ -13,8 +13,9 @@ import VM from '../src/vm'
 // (display (fib 7))
 // (display (plus 3 9))
 // `
+const stack = (vm) => vm.stack.slice(0, vm.sp + 1)
 
-test('parse to ast', (t) => {
+test('Simple math', (t) => {
   const ast = parser(tokenizer(`
     (+ 1 2)
     (/ (+ 1 5) (+ 1 1))
@@ -23,4 +24,33 @@ test('parse to ast', (t) => {
   const vm = new VM(codes)
   vm.run()
   t.deepEqual(vm.stack.slice(0, vm.sp + 1), [3, 3])
+})
+
+test('Condition', (t) => {
+  const ast = parser(tokenizer(`
+    (if (>= 1 2)
+      (+ 2 2)
+      (/ (+ 1 5) (+ 1 1)))
+  `))
+  const codes = codegen(ast)
+  const vm = new VM(codes)
+  vm.trace = true
+  vm.run()
+  t.deepEqual(stack(vm), [3])
+})
+
+test('Condition', (t) => {
+  const ast = parser(tokenizer(`
+    (if (>= 1 2)
+      (+ 2 2)
+      (/ (+ 1 5) (+ 1 1)))
+    (if (> 1 2)
+      1
+      (if (>= 10 32) 3 (/ 4 2)))
+    (if (< 2 10) (+ 1 11))
+  `))
+  const codes = codegen(ast)
+  const vm = new VM(codes)
+  vm.run()
+  t.deepEqual(stack(vm), [3, 2, 12])
 })

@@ -13,7 +13,8 @@ import VM, {
   JUMP,
   LOAD,
   CALL,
-  RETURN
+  RETURN,
+  makeReadableBytecodes
 } from '../src/vm'
 
 const spv = (vm, n = 0) => vm.stack[vm.sp - n]
@@ -178,4 +179,12 @@ test('CALL: call a function', (t) => {
   ])
   vm.run(9)
   t.is(spv(vm), -5)
+})
+
+test('makeReadableBytecodes', (t) => {
+  const codes = [IF_FALSE_JUMP, 0, JUMP, 0, CONST, 1, CONST, 2, CALL, 0, 1]
+  t.deepEqual(
+    makeReadableBytecodes(codes),
+    ['IF_FALSE_JUMP', 0, 'JUMP', 0, 'CONST', 1, 'CONST', 2, 'CALL', 0, 1]
+  )
 })

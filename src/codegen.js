@@ -48,18 +48,33 @@ export default (ast) => {
   ast.forEach(generateBytecodes)
 
   function generateBytecodes (astNode) {
+    if (!astNode) return
     if (astNode.type === AST_FUNCTION_CALL) {
       log(astNode)
       astNode.args.forEach(generateBytecodes)
       const builtinFunc = builtins[astNode.name]
       if (builtinFunc !== undefined) {
-        console.log('Using builtin', astNode.name, builtinFunc)
         bytecodes.push(builtinFunc)
       } else {
         console.log('should generate function for ', astNode.name)
       }
     } else if (astNode.type === AST_CONSTANT) {
       bytecodes.push(CONST, astNode.value)
+    } else if (astNode.type === AST_CONDITION) {
+      // generate condition for if
+      generateBytecodes(astNode.condition)
+      // make if condition run
+      bytecodes.push(IF_FALSE_JUMP, null)
+      const toSetFalseJumpPosition = bytecodes.length - 1
+      generateBytecodes(astNode.trueValue)
+      // should jump to condition end when if is end
+      bytecodes.push(JUMP, null)
+      const jumpInstructionPosition = bytecodes.length
+      bytecodes[toSetFalseJumpPosition] = jumpInstructionPosition
+      const toSetTrueEndPosition = bytecodes.length - 1
+      // generate else run
+      generateBytecodes(astNode.falseValue)
+      bytecodes[toSetTrueEndPosition] = bytecodes.length
     }
   }
 
