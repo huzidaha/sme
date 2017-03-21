@@ -44,19 +44,42 @@ const builtins = {
 
 export default (ast) => {
   const bytecodes = []
+  const symbols = {}
   const log = (astNode) => console.log(`Code generation ${astNode.type}`, astNode)
-  ast.forEach(generateBytecodes)
+  let functionSymbols = {}
+  let startPoint = 0
+  ast = sortAstNodes(ast)
+  ast.forEach((astNode) => {
+    if (astNode.type !== AST_FUNCTION && startPoint === 0) {
+      startPoint = bytecodes.length
+    }
+    generateBytecodes(astNode)
+  })
+
+  function sortAstNodes (astNodes) {
+    const newAst = []
+    astNodes.forEach((astNode) => {
+      if (astNode.type === AST_FUNCTION) {
+        newAst.unshift(astNode)
+      } else {
+        newAst.push(astNode)
+      }
+    })
+    return newAst
+  }
 
   function generateBytecodes (astNode) {
     if (!astNode) return
+    log(astNode)
     if (astNode.type === AST_FUNCTION_CALL) {
-      log(astNode)
       astNode.args.forEach(generateBytecodes)
       const builtinFunc = builtins[astNode.name]
       if (builtinFunc !== undefined) {
         bytecodes.push(builtinFunc)
       } else {
-        console.log('should generate function for ', astNode.name)
+        ensureFuntionExists(astNode)
+        const ip = symbols[astNode.name]
+        bytecodes.push(CALL, ip, astNode.args.length)
       }
     } else if (astNode.type === AST_CONSTANT) {
       bytecodes.push(CONST, astNode.value)
@@ -75,8 +98,35 @@ export default (ast) => {
       // generate else run
       generateBytecodes(astNode.falseValue)
       bytecodes[toSetTrueEndPosition] = bytecodes.length
+    } else if (astNode.type === AST_FUNCTION) {
+      const { name, args } = astNode.nameAndArguments
+      symbols[name] = bytecodes.length
+      functionSymbols = {}
+      let argsIndexStart = -2 - args.length
+      args.forEach((arg, i) => {
+        functionSymbols[arg] = argsIndexStart + i
+      })
+      generateBytecodes(astNode.body)
+      bytecodes.push(RETURN)
+    } else if (astNode.type === AST_VARIABLE) {
+      ensureVariableExists(astNode)
+      const ip = functionSymbols[astNode.name]
+      bytecodes.push(LOAD, ip)
     }
   }
 
+  function ensureVariableExists (astNode) {
+    if (functionSymbols[astNode.name] === undefined) {
+      throw new Error(`${astNode.name} is not defined.`)
+    }
+  }
+
+  function ensureFuntionExists (astNode) {
+    if (symbols[astNode.name] === undefined) {
+      throw new Error(`function ${astNode.name} is not defined.`)
+    }
+  }
+
+  bytecodes.startPoint = startPoint
   return bytecodes
 }

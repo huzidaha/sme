@@ -27,12 +27,11 @@ test('Simple math', (t) => {
 })
 
 test('Condition', (t) => {
-  const ast = parser(tokenizer(`
+  const codes = codegen(parser(tokenizer(`
     (if (>= 1 2)
       (+ 2 2)
       (/ (+ 1 5) (+ 1 1)))
-  `))
-  const codes = codegen(ast)
+  `)))
   const vm = new VM(codes)
   vm.trace = true
   vm.run()
@@ -53,4 +52,22 @@ test('Condition', (t) => {
   const vm = new VM(codes)
   vm.run()
   t.deepEqual(stack(vm), [3, 2, 12])
+})
+
+test('Function definition', (t) => {
+  const codes = codegen(parser(tokenizer(`
+    (define (sayHi x y)
+      (if (> x y) (+ x y) (- x y)))
+    (define (fib n)
+      (if (<= n 2)
+        1
+        (+ (fib (- n 1)) (fib (- n 2)))))
+    (sayHi 10 2)
+    (sayHi 2 10)
+    (fib 7)
+  `)))
+  console.log(makeReadableBytecodes(codes))
+  const vm = new VM(codes)
+  vm.run(codes.startPoint)
+  t.deepEqual(stack(vm), [12, -8, 13])
 })

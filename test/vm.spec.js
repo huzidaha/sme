@@ -185,6 +185,11 @@ test('makeReadableBytecodes', (t) => {
   const codes = [IF_FALSE_JUMP, 0, JUMP, 0, CONST, 1, CONST, 2, CALL, 0, 1]
   t.deepEqual(
     makeReadableBytecodes(codes),
-    ['IF_FALSE_JUMP', 0, 'JUMP', 0, 'CONST', 1, 'CONST', 2, 'CALL', 0, 1]
+`IF_FALSE_JUMP 0
+JUMP 0
+CONST 1
+CONST 2
+CALL 0 1
+`
   )
 })

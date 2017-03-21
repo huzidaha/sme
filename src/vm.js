@@ -162,8 +162,9 @@ export const makeReadableBytecodes = (codes) => {
     bytecodes.push(instruction.name)
     for (let j = 0, len2 = instruction.numOfOperants; j < len2; j++) {
       const operant = codes[++i]
-      bytecodes.push(operant)
+      bytecodes.push(' ', operant)
     }
+    bytecodes.push('\n')
   }
-  return bytecodes
+  return bytecodes.join('')
 }
