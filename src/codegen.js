@@ -24,7 +24,8 @@ import {
   JUMP,
   LOAD,
   CALL,
-  RETURN
+  RETURN,
+  HALT
 } from './vm'
 
 const builtins = {
@@ -45,12 +46,18 @@ const builtins = {
 export default (ast) => {
   const bytecodes = []
   const symbols = {}
-  const log = (astNode) => console.log(`Code generation ${astNode.type}`, astNode)
+  const functionCallsQueue = []
+  const log = (astNode) => {
+    // console.log(`Code generation ${astNode.type}`, astNode)
+  }
   let functionSymbols = {}
-  let startPoint = 0
+  let startPoint = null
   ast = sortAstNodes(ast)
   ast.forEach((astNode) => {
-    if (astNode.type !== AST_FUNCTION && startPoint === 0) {
+    if (
+      astNode.type !== AST_FUNCTION &&
+      startPoint === null
+    ) {
       startPoint = bytecodes.length
     }
     generateBytecodes(astNode)
@@ -77,9 +84,11 @@ export default (ast) => {
       if (builtinFunc !== undefined) {
         bytecodes.push(builtinFunc)
       } else {
-        ensureFuntionExists(astNode)
-        const ip = symbols[astNode.name]
-        bytecodes.push(CALL, ip, astNode.args.length)
+        bytecodes.push(CALL, null, astNode.args.length)
+        functionCallsQueue.push({
+          name: astNode.name,
+          position: bytecodes.length - 2
+        })
       }
     } else if (astNode.type === AST_CONSTANT) {
       bytecodes.push(PUSH, astNode.value)
@@ -117,16 +126,25 @@ export default (ast) => {
 
   function ensureVariableExists (astNode) {
     if (functionSymbols[astNode.name] === undefined) {
-      throw new Error(`${astNode.name} is not defined.`)
+      throw new Error(`'${astNode.name}' is not defined.`)
     }
   }
 
-  function ensureFuntionExists (astNode) {
-    if (symbols[astNode.name] === undefined) {
-      throw new Error(`function ${astNode.name} is not defined.`)
+  function ensureFuntionExists (name) {
+    if (symbols[name] === undefined) {
+      throw new Error(`function '${name}' is not defined.`)
     }
   }
 
-  bytecodes.startPoint = startPoint
+  function flushFunctionCalls () {
+    functionCallsQueue.forEach((functionCall) => {
+      ensureFuntionExists(functionCall.name)
+      const functionIp = symbols[functionCall.name]
+      bytecodes[functionCall.position] = functionIp
+    })
+  }
+
+  flushFunctionCalls()
+  bytecodes.push(HALT, startPoint || 0)
   return bytecodes
 }

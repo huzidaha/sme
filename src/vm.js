@@ -16,6 +16,7 @@ export const JUMP = 14
 export const LOAD = 15
 export const CALL = 16
 export const RETURN = 17
+export const HALT = 18
 
 export default class VM {
   constructor (codes = []) {
@@ -124,6 +125,8 @@ export default class VM {
           this.sp = this.sp - stack[this.sp] // jump to last
           stack[this.sp] = a // set it to returned value
           break
+        case HALT:
+          return
         default:
           break
       }
@@ -151,7 +154,8 @@ const codeMaps = {
   [JUMP]: inst('JUMP', 1),
   [LOAD]: inst('LOAD', 1),
   [CALL]: inst('CALL', 2),
-  [RETURN]: inst('RETURN', 0)
+  [RETURN]: inst('RETURN', 0),
+  [HALT]: inst('HALT', 1)
 }
 
 export const makeReadableBytecodes = (codes) => {
@@ -159,7 +163,7 @@ export const makeReadableBytecodes = (codes) => {
   for (let i = 0, len = codes.length; i < len; i++) {
     const code = codes[i]
     const instruction = codeMaps[code]
-    bytecodes.push(instruction.name)
+    bytecodes.push(i, ' ', instruction.name)
     for (let j = 0, len2 = instruction.numOfOperants; j < len2; j++) {
       const operant = codes[++i]
       bytecodes.push(' ', operant)

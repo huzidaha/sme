@@ -45,7 +45,6 @@ export default (tokens) => {
   }
 
   function parseExpression () {
-    console.log('Parsing: Expression')
     const lookup = peekToken()
     if (isToken(lookup, TK_DEFINE)) {
       return parseFunction()
@@ -55,7 +54,6 @@ export default (tokens) => {
   }
 
   function parseFunction () {
-    console.log('Parsing: FUNCTION')
     const node = { type: AST_FUNCTION }
     eatToken(TK_PARENT_LEFT)
     eatToken(TK_DEFINE)
@@ -66,7 +64,6 @@ export default (tokens) => {
   }
 
   function parseNameArgumentsList () {
-    console.log('Parsing: arguments-list')
     let token = currentToken()
     const args = []
     const node = {}
@@ -92,7 +89,6 @@ export default (tokens) => {
     eatToken(TK_PARENT_LEFT)
     let node
     const token = currentToken()
-    console.log('Parsing: value', token)
     if (isToken(token, TK_IF)) {
       node = parseCondition()
     } else if (isToken(token, TK_NAME)) {
@@ -105,55 +101,40 @@ export default (tokens) => {
   }
 
   function parseCondition () {
-    console.log('Parsing: condition')
     eatToken(TK_IF)
     const node = { type: AST_CONDITION }
-    node.condition = parseValueOrConstant()
-    node.trueValue = parseValueOrConstant()
-    const token = currentToken()
-    if (
-      isToken(token, TK_PARENT_LEFT) ||
-      isConstant(token)
-    ) {
-      node.falseValue = parseValueOrConstant()
-    }
+    node.condition = parseValueOrConstantOrName()
+    ensureExist(node.condition, 'condition must provide!')
+    node.trueValue = parseValueOrConstantOrName()
+    ensureExist(node.trueValue, 'true value must provide!')
+    node.falseValue = parseValueOrConstantOrName()
+    ensureExist(node.falseValue, 'false must provide!')
     return node
   }
 
-  function parseValueOrConstant () {
-    console.log('Parsing: value or constant')
+  function parseValueOrConstantOrName () {
     const token = currentToken()
-    if (isToken(token, TK_PARENT_LEFT)) {
+    if (isToken(token, TK_NAME)) {
+      nextToken()
+      return { type: AST_VARIABLE, name: token.value }
+    } else if (isToken(token, TK_PARENT_LEFT)) {
       return parseValue()
-    } else {
+    } else if ((isConstant(token))) {
       return parseConstant()
     }
   }
 
   function parseFunctionCall () {
     let token = eatToken(TK_NAME)
-    console.log('Parsing: function call', token)
     const node = {
       type: AST_FUNCTION_CALL,
       name: token.value
     }
     const args = []
     token = currentToken()
-    while (
-      isToken(token, TK_PARENT_LEFT) ||
-      isToken(token, TK_NAME) ||
-      isConstant(token)
-    ) {
-      if (isToken(token, TK_NAME)) {
-        args.push({ type: AST_VARIABLE, name: token.value })
-        token = nextToken()
-      } else if (isToken(token, TK_PARENT_LEFT)) {
-        args.push(parseValue())
-        token = currentToken()
-      } else {
-        args.push(parseConstant())
-        token = currentToken()
-      }
+    while (isValueOrConstantOrName(token)) {
+      args.push(parseValueOrConstantOrName())
+      token = currentToken()
     }
     node.args = args
     return node
@@ -163,6 +144,12 @@ export default (tokens) => {
     const token = currentToken()
     nextToken()
     return { type: AST_CONSTANT, value: token.value }
+  }
+
+  function isValueOrConstantOrName (token) {
+    return isToken(token, TK_PARENT_LEFT) ||
+      isToken(token, TK_NAME) ||
+      isConstant(token)
   }
 
   function isConstant (token) {
@@ -183,8 +170,14 @@ export default (tokens) => {
     }
   }
 
+  function ensureExist (value, message) {
+    if (value === null || value === undefined) {
+      error(message)
+    }
+  }
+
   function error (message) {
-    throw new Error(message)
+    throw new Error(`Parser Error: ${message}`)
   }
 
   function errorToken (token, expectedToken) {
