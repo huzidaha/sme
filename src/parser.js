@@ -1,14 +1,14 @@
 /*
 program ::= { expression }
 expression ::= function | value
-function ::= '(', 'define', name-arguments-list, value, ')'
-name-arguments-list ::= name | '(', { name } ')'
-value ::= '(', constants | function-call | condition, ')'
-function-call ::= name, [arguments]
-arguments ::= { value | constants | name }
-condition ::= 'if', value | constants, value | constants, value | constants
-constants ::= number | string
-name ::= [_a-zA-Z][a-zA-Z0-9]*
+function ::= '(', 'define', name-list, value, ')'
+name-list ::= name | '(', { name } ')'
+value ::= '(', constant | function-call | condition, ')'
+function-call ::= name, [argument]
+condition ::= 'if', argument, argument, argument
+argument ::= { value | constant | name }
+constant ::= number | string
+name ::= anthing is not number or string
 
 tokens:
   '(', ')', 'define', 'if', string, number, name
@@ -32,7 +32,6 @@ export const AST_CONSTANT = 'constant'
 
 export default (tokens) => {
   let index = 0
-  const peekToken = () => tokens[index + 1]
   const currentToken = () => tokens[index]
   const nextToken = () => tokens[++index]
 
@@ -45,7 +44,7 @@ export default (tokens) => {
   }
 
   function parseExpression () {
-    const lookup = peekToken()
+    const lookup = tokens[index + 1]
     if (isToken(lookup, TK_DEFINE)) {
       return parseFunction()
     } else {
@@ -57,13 +56,13 @@ export default (tokens) => {
     const node = { type: AST_FUNCTION }
     eatToken(TK_PARENT_LEFT)
     eatToken(TK_DEFINE)
-    node.nameAndArguments = parseNameArgumentsList()
+    node.nameAndArguments = parseNameList()
     node.body = parseValue()
     eatToken(TK_PARENT_RIGHT)
     return node
   }
 
-  function parseNameArgumentsList () {
+  function parseNameList () {
     let token = currentToken()
     const args = []
     const node = {}
@@ -103,16 +102,16 @@ export default (tokens) => {
   function parseCondition () {
     eatToken(TK_IF)
     const node = { type: AST_CONDITION }
-    node.condition = parseValueOrConstantOrName()
+    node.condition = parseArgument()
     ensureExist(node.condition, 'condition must provide!')
-    node.trueValue = parseValueOrConstantOrName()
+    node.trueValue = parseArgument()
     ensureExist(node.trueValue, 'true value must provide!')
-    node.falseValue = parseValueOrConstantOrName()
+    node.falseValue = parseArgument()
     ensureExist(node.falseValue, 'false must provide!')
     return node
   }
 
-  function parseValueOrConstantOrName () {
+  function parseArgument () {
     const token = currentToken()
     if (isToken(token, TK_NAME)) {
       nextToken()
@@ -132,8 +131,8 @@ export default (tokens) => {
     }
     const args = []
     token = currentToken()
-    while (isValueOrConstantOrName(token)) {
-      args.push(parseValueOrConstantOrName())
+    while (isArgument(token)) {
+      args.push(parseArgument())
       token = currentToken()
     }
     node.args = args
@@ -146,7 +145,7 @@ export default (tokens) => {
     return { type: AST_CONSTANT, value: token.value }
   }
 
-  function isValueOrConstantOrName (token) {
+  function isArgument (token) {
     return isToken(token, TK_PARENT_LEFT) ||
       isToken(token, TK_NAME) ||
       isConstant(token)

@@ -47,9 +47,7 @@ export default (ast) => {
   const bytecodes = []
   const symbols = {}
   const functionCallsQueue = []
-  const log = (astNode) => {
-    // console.log(`Code generation ${astNode.type}`, astNode)
-  }
+  const log = (astNode) => { /* console.log(`Code generation ${astNode.type}`, astNode) */ }
   let functionSymbols = {}
   let startPoint = null
   ast = sortAstNodes(ast)
@@ -121,6 +119,8 @@ export default (ast) => {
       ensureVariableExists(astNode)
       const ip = functionSymbols[astNode.name]
       bytecodes.push(LOAD, ip)
+    } else {
+      throw new Error(`Unknown AST node type '${astNode.type}'`)
     }
   }
 
@@ -136,7 +136,7 @@ export default (ast) => {
     }
   }
 
-  function flushFunctionCalls () {
+  function injectFunctionCalls () {
     functionCallsQueue.forEach((functionCall) => {
       ensureFuntionExists(functionCall.name)
       const functionIp = symbols[functionCall.name]
@@ -144,7 +144,7 @@ export default (ast) => {
     })
   }
 
-  flushFunctionCalls()
+  injectFunctionCalls()
   bytecodes.push(HALT, startPoint || 0)
   return bytecodes
 }
