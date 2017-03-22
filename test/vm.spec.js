@@ -4,7 +4,7 @@ import VM, {
   SUBSTRACT,
   MULTIPLE,
   DIVIDE,
-  CONST,
+  PUSH,
   PRINT,
   EQUAL_TO,
   GREATER_THAN,
@@ -19,11 +19,11 @@ import VM, {
 
 const spv = (vm, n = 0) => vm.stack[vm.sp - n]
 
-test('CONST instruction', (t) => {
+test('PUSH instruction', (t) => {
   const vm = new VM([
-    CONST, 1,
-    CONST, 2,
-    CONST, 3
+    PUSH, 1,
+    PUSH, 2,
+    PUSH, 3
   ])
   vm.run()
   t.deepEqual(vm.stack, [1, 2, 3])
@@ -31,16 +31,16 @@ test('CONST instruction', (t) => {
 
 test('Math instructions', (t) => {
   const vm = new VM([
-    CONST, 1,
-    CONST, 2,
+    PUSH, 1,
+    PUSH, 2,
     ADD,
-    CONST, 21,
+    PUSH, 21,
     ADD,
-    CONST, 48,
+    PUSH, 48,
     DIVIDE,
-    CONST, 3,
+    PUSH, 3,
     MULTIPLE,
-    CONST, 5.5,
+    PUSH, 5.5,
     SUBSTRACT
   ])
   vm.run()
@@ -50,7 +50,7 @@ test('Math instructions', (t) => {
 
 test('PRINT', (t) => {
   const vm = new VM([
-    CONST, 20, PRINT
+    PUSH, 20, PRINT
   ])
   vm.run()
   t.is(vm.sp, -1)
@@ -58,15 +58,15 @@ test('PRINT', (t) => {
 
 test('EQUAL_TO', (t) => {
   let vm = new VM([
-    CONST, 20,
-    CONST, 20,
+    PUSH, 20,
+    PUSH, 20,
     EQUAL_TO
   ])
   vm.run()
   t.is(vm.stack[vm.sp], true)
   vm = new VM([
-    CONST, 21,
-    CONST, 20,
+    PUSH, 21,
+    PUSH, 20,
     EQUAL_TO
   ])
   vm.run()
@@ -75,15 +75,15 @@ test('EQUAL_TO', (t) => {
 
 test('LESS_THAN', (t) => {
   let vm = new VM([
-    CONST, 20,
-    CONST, 21,
+    PUSH, 20,
+    PUSH, 21,
     LESS_THAN
   ])
   vm.run()
   t.is(vm.stack[vm.sp], true)
   vm = new VM([
-    CONST, 21,
-    CONST, 20,
+    PUSH, 21,
+    PUSH, 20,
     LESS_THAN
   ])
   vm.run()
@@ -92,15 +92,15 @@ test('LESS_THAN', (t) => {
 
 test('GREATER_THAN', (t) => {
   let vm = new VM([
-    CONST, 20,
-    CONST, 21,
+    PUSH, 20,
+    PUSH, 21,
     GREATER_THAN
   ])
   vm.run()
   t.is(vm.stack[vm.sp], false)
   vm = new VM([
-    CONST, 21,
-    CONST, 20,
+    PUSH, 21,
+    PUSH, 20,
     GREATER_THAN
   ])
   vm.run()
@@ -109,18 +109,18 @@ test('GREATER_THAN', (t) => {
 
 test('IF_FALSE_JUMP: TRUE', (t) => {
   let vm = new VM([
-    CONST, 20, // 0
-    CONST, 21, // 2
+    PUSH, 20, // 0
+    PUSH, 21, // 2
     GREATER_THAN, // 4
     IF_FALSE_JUMP, 14, // 5
-    CONST, 3, // 7
-    CONST, 5, // 9
+    PUSH, 3, // 7
+    PUSH, 5, // 9
     ADD, // 11
     JUMP, 19, // 12
-    CONST, 2, // 14
-    CONST, 12, // 16
+    PUSH, 2, // 14
+    PUSH, 12, // 16
     SUBSTRACT, // 18
-    CONST, 1, // 19
+    PUSH, 1, // 19
     ADD // 20
   ])
   vm.run()
@@ -129,18 +129,18 @@ test('IF_FALSE_JUMP: TRUE', (t) => {
 
 test('IF_FALSE_JUMP: FALSE', (t) => {
   let vm = new VM([
-    CONST, 20, // 0
-    CONST, 21, // 2
+    PUSH, 20, // 0
+    PUSH, 21, // 2
     LESS_THAN, // 4
     IF_FALSE_JUMP, 14, // 5
-    CONST, 3, // 7
-    CONST, 5, // 9
+    PUSH, 3, // 7
+    PUSH, 5, // 9
     ADD, // 11
     JUMP, 19, // 12
-    CONST, 2, // 14
-    CONST, 12, // 16
+    PUSH, 2, // 14
+    PUSH, 12, // 16
     SUBSTRACT, // 18
-    CONST, 1, // 19
+    PUSH, 1, // 19
     ADD // 20
   ])
   vm.run()
@@ -165,15 +165,15 @@ test('CALL: call a function', (t) => {
     SUBSTRACT, // 7
     RETURN, // 8
 
-    CONST, 2, // 9
-    CONST, 4, // 11
-    CONST, 1, // 13
-    CONST, 3, // 15
+    PUSH, 2, // 9
+    PUSH, 4, // 11
+    PUSH, 1, // 13
+    PUSH, 3, // 15
     CALL, 0, 3, // call function a with arguments num 3
     MULTIPLE,
-    CONST, 2,
-    CONST, 2,
-    CONST, 3,
+    PUSH, 2,
+    PUSH, 2,
+    PUSH, 3,
     CALL, 0, 3,
     ADD
   ])
@@ -182,13 +182,13 @@ test('CALL: call a function', (t) => {
 })
 
 test('makeReadableBytecodes', (t) => {
-  const codes = [IF_FALSE_JUMP, 0, JUMP, 0, CONST, 1, CONST, 2, CALL, 0, 1]
+  const codes = [IF_FALSE_JUMP, 0, JUMP, 0, PUSH, 1, PUSH, 2, CALL, 0, 1]
   t.deepEqual(
     makeReadableBytecodes(codes),
 `IF_FALSE_JUMP 0
 JUMP 0
-CONST 1
-CONST 2
+PUSH 1
+PUSH 2
 CALL 0 1
 `
   )

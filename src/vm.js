@@ -2,7 +2,7 @@ export const ADD = 0
 export const SUBSTRACT = 1
 export const MULTIPLE = 2
 export const DIVIDE = 3
-export const CONST = 4
+export const PUSH = 4
 export const PRINT = 5
 export const EQUAL_TO = 6
 export const GREATER_THAN = 7
@@ -45,7 +45,7 @@ export default class VM {
       let a, b
       const code = codes[this.ip++]
       switch (code) {
-        case CONST:
+        case PUSH:
           stack[++this.sp] = codes[this.ip++]
           break
         case ADD:
@@ -138,7 +138,7 @@ const codeMaps = {
   [SUBSTRACT]: inst('SUBSTRACT', 0),
   [MULTIPLE]: inst('MULTIPLE', 0),
   [DIVIDE]: inst('DIVIDE', 0),
-  [CONST]: inst('CONST', 1),
+  [PUSH]: inst('PUSH', 1),
   [PRINT]: inst('PRINT', 0),
   [EQUAL_TO]: inst('EQUAL_TO', 0),
   [GREATER_THAN]: inst('GREATER_THAN', 0),

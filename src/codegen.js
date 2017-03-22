@@ -11,7 +11,7 @@ import {
   SUBSTRACT,
   MULTIPLE,
   DIVIDE,
-  CONST,
+  PUSH,
   PRINT,
   EQUAL_TO,
   GREATER_THAN,
@@ -82,7 +82,7 @@ export default (ast) => {
         bytecodes.push(CALL, ip, astNode.args.length)
       }
     } else if (astNode.type === AST_CONSTANT) {
-      bytecodes.push(CONST, astNode.value)
+      bytecodes.push(PUSH, astNode.value)
     } else if (astNode.type === AST_CONDITION) {
       // generate condition for if
       generateBytecodes(astNode.condition)
