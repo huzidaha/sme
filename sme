@@ -1,0 +1,21 @@
+#!./node_modules/.bin/babel-node
+
+import VM, { makeReadableBytecodes } from './src/vm'
+import fs from 'fs'
+
+function start () {
+  const fileName = process.argv[2]
+  if (!fileName) {
+    console.log('No input file')
+    process.exit()
+  }
+  const codes = fs.readFileSync(fileName)
+  const decoded = []
+  for (let i = 0, len = codes.length / 4; i < len; i++) {
+    decoded.push(codes.readFloatBE(i * 4))
+  }
+  const vm = new VM(decoded)
+  vm.run(decoded[decoded.length - 1])
+}
+
+start()

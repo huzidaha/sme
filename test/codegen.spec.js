@@ -104,7 +104,7 @@ test('fib and sqrt', (t) => {
       (< (abs (- (square guess) x)) 0.001))
     (define (sqrt x)
       (sqrt-iter 1.0 x))
-    (sqrt (fib 9))
+    (display (sqrt (fib 9)))
   `)))
   console.log(makeReadableBytecodes(codes))
   const vm = new VM(codes)

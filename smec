@@ -1,0 +1,28 @@
+#!./node_modules/.bin/babel-node
+import parser from './src/parser'
+import tokenizer from './src/tokenizer'
+import codegen from './src/codegen'
+import fs from 'fs'
+import path from 'path'
+
+function start () {
+  const fileName = process.argv[2]
+  if (!fileName) {
+    console.log('No input file')
+    process.exit()
+  }
+  const rawCode = fs.readFileSync(fileName, 'utf-8')
+  const parsedName = path.parse(fileName)
+  compile(rawCode, parsedName.name, parsedName.ext)
+}
+
+function compile (rawCode, name) {
+  const codes = codegen(parser(tokenizer(rawCode)))
+  const buffer = Buffer.alloc(codes.length * 4, 0)
+  codes.forEach((code, i) => {
+    buffer.writeFloatBE(code, i * 4)
+  })
+  fs.writeFileSync(`${name}.smebytes`, buffer)
+}
+
+start()
