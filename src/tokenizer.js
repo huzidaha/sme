@@ -14,7 +14,9 @@ export default (code) => {
   let str = ''
   while (i < code.length) {
     const char = code[i++]
-    if (char.trim() === '') {
+    if (char !== '\'' && isInString) {
+      str += char
+    } else if (char.trim() === '') {
       processToken()
     } else if (char === '(') {
       processToken()
@@ -29,11 +31,7 @@ export default (code) => {
       }
       isInString = !isInString
     } else {
-      if (isInString) {
-        str += char
-      } else {
-        token += char
-      }
+      token += char
     }
   }
 

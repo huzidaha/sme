@@ -15,6 +15,7 @@ function start () {
     decoded.push(codes.readFloatBE(i * 4))
   }
   const vm = new VM(decoded)
+  console.log(makeReadableBytecodes(decoded))
   vm.run(decoded[decoded.length - 1])
 }
 
